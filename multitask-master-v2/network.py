@@ -32,7 +32,7 @@ def popvec(y):
 
     Assuming the last dimension is the dimension to be collapsed
 
-    Args:
+    Ar
         y: population output on a ring network. Numpy array (Batch, Units)
 
     Returns:
@@ -99,6 +99,7 @@ def get_perf(y_hat, y_loc):
 
 
 class LeakyRNNCell(RNNCell):
+    # RRNCell is a tensor flow function
     """The most basic RNN cell.
 
     Args:
@@ -175,11 +176,14 @@ class LeakyRNNCell(RNNCell):
                       self.rng.randn(n_hidden, n_hidden)/np.sqrt(n_hidden))
 
         matrix0 = np.concatenate((w_in0, w_rec0), axis=0)
+        # all the weights together
 
         self.w_rnn0 = matrix0
+        # whole weight matrix incoming and recurrent
         # self._initializer = tf.constant_initializer(matrix0, dtype=tf.float32)
         # function deprecated, new function:
         self._initializer = tf.compat.v1.constant_initializer(matrix0, dtype=tf.float32)
+        # initializer is tf thing, gets fed matrix and type
 
     @property
     def state_size(self):
@@ -204,6 +208,7 @@ class LeakyRNNCell(RNNCell):
         self._kernel = self.add_variable(
                 'kernel',
                 shape=[input_depth + self._num_units, self._num_units],
+                # two values are Wrec and Win
                 initializer=self._initializer)
         self._bias = self.add_variable(
                 'bias',
@@ -216,6 +221,8 @@ class LeakyRNNCell(RNNCell):
         """Most basic RNN: output = new_state = act(W * input + U * state + B)."""
 
         gate_inputs = math_ops.matmul(
+        # math_ops is tensorflow
+        # matmul is matrix multiplication    
             array_ops.concat([inputs, state], 1), self._kernel)
         gate_inputs = nn_ops.bias_add(gate_inputs, self._bias)
 
@@ -262,7 +269,7 @@ class LeakyGRUCell(RNNCell):
                name=None):
     super(LeakyGRUCell, self).__init__(_reuse=reuse, name=name)
 
-    # Inputs must be 2-dimensional.
+    # Inputs must be 2-dimensional.(RNN was one dimensional)
     # self.input_spec = base_layer.InputSpec(ndim=2)
 
     self._num_units = num_units
@@ -421,8 +428,12 @@ class LeakyRNNCellSeparateInput(RNNCell):
                 'bias',
                 shape=[self._num_units],
                 initializer=init_ops.zeros_initializer(dtype=self.dtype))
-
+        
+        # _kernel and _bias is adding something onto the RNN object
+        
         self.built = True
+        
+        # Function used to set up for tensorflow  
 
     def call(self, inputs, state):
         """output = new_state = act(input + U * state + B)."""
@@ -465,6 +476,7 @@ class Model(object):
         tf.compat.v1.reset_default_graph()
 
         if hp is None:
+            # load in from model directory:
             hp = tools.load_hp(model_dir)
             if hp is None:
                 raise ValueError(
@@ -476,10 +488,12 @@ class Model(object):
         self.rng = np.random.RandomState(hp['seed'])
 
         if sigma_rec is not None:
+            # sigma_rec = time stamp - keep it
             print('Overwrite sigma_rec with {:0.3f}'.format(sigma_rec))
             hp['sigma_rec'] = sigma_rec
 
         if dt is not None:
+            # leave this
             print('Overwrite original dt with {:0.1f}'.format(dt))
             hp['dt'] = dt
 
@@ -502,7 +516,9 @@ class Model(object):
             self._build_fused(hp)
 
         self.var_list = tf.compat.v1.trainable_variables()
+        # trainable_variables = tensorflow
         self.weight_list = [v for v in self.var_list if is_weight(v)]
+        # if value is a weight, it will put it in this list
 
         if 'use_separate_input' in hp and hp['use_separate_input']:
             self._set_weights_separate(hp)
@@ -510,6 +526,9 @@ class Model(object):
             self._set_weights_fused(hp)
 
         # Regularization terms
+            # Regularizations are techniques used to reduce the error by 
+            # fitting a function appropriately on the given training 
+            # set and avoid overfitting
         self.cost_reg = tf.constant(0.)
         if hp['l1_h'] > 0:
             self.cost_reg += tf.reduce_mean(input_tensor=tf.abs(self.h)) * hp['l1_h']
@@ -524,6 +543,7 @@ class Model(object):
                 [tf.nn.l2_loss(v) for v in self.weight_list])
 
         # Create an optimizer.
+            # (tensorflow thing)
         if 'optimizer' not in hp or hp['optimizer'] == 'adam':
             self.opt = tf.compat.v1.train.AdamOptimizer(
                 learning_rate=hp['learning_rate'])

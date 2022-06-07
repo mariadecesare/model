@@ -773,6 +773,7 @@ def dm2(config, mode, **kwargs):
     return _dm(config, mode, 2, **kwargs)
 
 
+# task we are going to try out:
 def _delaydm(config, mode, stim_mod, **kwargs):
     '''
     Fixate whenever fixation point is shown.
