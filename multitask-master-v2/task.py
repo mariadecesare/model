@@ -764,7 +764,6 @@ def _dm(config, mode, stim_mod, **kwargs):
 
     return trial
 
-
 def dm1(config, mode, **kwargs):
     return _dm(config, mode, 1, **kwargs)
 
