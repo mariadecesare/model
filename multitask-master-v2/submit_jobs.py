@@ -169,55 +169,55 @@ elif args.run == 'seq_varyhp':
             cmd, jobname, sbatchpath, scratchpath, ppn=1, gpus=0)
         subprocess.call(['sbatch', jobfile])
 
-elif args.run == 'mante':
+elif args.run == '_delaydm':
     for seed in range(0, 20):
-        jobname = 'train_mante_{:d}'.format(seed)
+        jobname = 'train_delaydm_{:d}'.format(seed)
         train_arg = 'seed={:d}'.format(seed)
-        cmd = r'''python -c "import experiment as e;e.train_mante('''+\
+        cmd = r'''python -c "import experiment as e;e.train_delaydm('''+\
               train_arg+''')"'''
 
         jobfile = write_jobfile(
             cmd, jobname, sbatchpath, scratchpath, ppn=1, gpus=0)
         subprocess.call(['sbatch', jobfile])
 
-elif args.run == 'mante_tanh':
+elif args.run == '_delaydm_tanh':
     for seed in range(0, 50):
-        jobname = 'mantetanh_{:d}'.format(seed)
+        jobname = '_delaydmtanh_{:d}'.format(seed)
         train_arg = 'seed={:d}'.format(seed)
-        cmd = r'''python -c "import experiment as e;e.mante_tanh('''+\
+        cmd = r'''python -c "import experiment as e;e._delaydm_tanh('''+\
               train_arg+''')"'''
 
         jobfile = write_jobfile(
             cmd, jobname, sbatchpath, scratchpath, ppn=1, gpus=0)
         subprocess.call(['sbatch', jobfile])
 
-elif args.run == 'mante_vary_l2init':
+elif args.run == '_delaydm_vary_l2init':
     for i in range(0, 300):
-        jobname = 'mante_vary_l2init_{:d}'.format(i)
+        jobname = '_delaydm_vary_l2init_{:d}'.format(i)
         train_arg = '{:d}'.format(i)
-        cmd = r'''python -c "import experiment as e;e.vary_l2_init_mante('''+\
+        cmd = r'''python -c "import experiment as e;e.vary_l2_init_delaydm('''+\
               train_arg+''')"'''
 
         jobfile = write_jobfile(
             cmd, jobname, sbatchpath, scratchpath, ppn=1, gpus=0)
         subprocess.call(['sbatch', jobfile])
 
-elif args.run == 'mante_vary_l2weight':
+elif args.run == '_delaydm_vary_l2weight':
     for i in range(0, 300):
-        jobname = 'mante_vary_l2weight_{:d}'.format(i)
+        jobname = '_delaydm_vary_l2weight_{:d}'.format(i)
         train_arg = '{:d}'.format(i)
-        cmd = r'''python -c "import experiment as e;e.vary_l2_weight_mante('''+\
+        cmd = r'''python -c "import experiment as e;e.vary_l2_weight_delaydm('''+\
               train_arg+''')"'''
 
         jobfile = write_jobfile(
             cmd, jobname, sbatchpath, scratchpath, ppn=1, gpus=0)
         subprocess.call(['sbatch', jobfile])
 
-elif args.run == 'mante_vary_pweighttrain':
+elif args.run == '_delaydm_vary_pweighttrain':
     for i in range(200, 260):
-        jobname = 'mante_vary_pweighttrain_{:d}'.format(i)
+        jobname = '_delaydm_vary_pweighttrain_{:d}'.format(i)
         train_arg = '{:d}'.format(i)
-        cmd = r'''python -c "import experiment as e;e.vary_p_weight_train_mante('''+\
+        cmd = r'''python -c "import experiment as e;e.vary_p_weight_train_delaydm('''+\
               train_arg+''')"'''
 
         jobfile = write_jobfile(

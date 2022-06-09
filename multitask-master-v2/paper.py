@@ -115,7 +115,7 @@ model_dir = root_dir + '/0'
 
 ## Data analysis------------------------------------------------------------
 # Note that these wouldn't work without the data file
-# data_analysis.plot_all('mante_single_ar')
-# data_analysis.plot_all('mante_single_fe')
-# data_analysis.plot_all('mante_ar')
-# data_analysis.plot_all('mante_fe')
+# data_analysis.plot_all('_delaydm_single_ar')
+# data_analysis.plot_all('_delaydm_single_fe')
+# data_analysis.plot_all('_delaydm_ar')
+# data_analysis.plot_all('_delaydm_fe')

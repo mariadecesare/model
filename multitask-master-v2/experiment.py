@@ -18,19 +18,19 @@ from analysis import taskset
 DATAPATH = os.path.join(os.getcwd(), 'data')
 
 
-def train_mante(seed=0, model_dir='train_mante'):
-    """Training of only the Mante task."""
+def train_delaydm(seed=0, model_dir='train_delaydm'):
+    """Training of only the _delaydm task."""
     hp = {'target_perf': 0.9}
     model_dir = os.path.join(DATAPATH, model_dir, str(seed))
-    train.train(model_dir, hp=hp, ruleset='mante', seed=seed)
+    train.train(model_dir, hp=hp, ruleset='_delaydm', seed=seed)
 
 
-def mante_tanh(seed=0, model_dir='mante_tanh'):
-    """Training of only the Mante task."""
+def _delaydm_tanh(seed=0, model_dir='_delaydm_tanh'):
+    """Training of only the _delaydm task."""
     hp = {'activation': 'tanh',
                'target_perf': 0.9}
     model_dir = os.path.join(DATAPATH, model_dir, str(seed))
-    train.train(model_dir, hp=hp, ruleset='mante', seed=seed)
+    train.train(model_dir, hp=hp, ruleset='_delaydm', seed=seed)
     # Analyses
     variance.compute_variance(model_dir)
 
@@ -251,8 +251,8 @@ def train_vary_hp(i):
     data_analysis.compute_var_all(model_dir)
 
 
-def _base_vary_hp_mante(i, hp_ranges, base_name):
-    """Vary hyperparameters for mante tasks."""
+def _base_vary_hp_delaydm(i, hp_ranges, base_name):
+    """Vary hyperparameters for _delaydm tasks."""
     # Unravel the input index
     keys = hp_ranges.keys()
     dims = [len(hp_ranges[k]) for k in keys]
@@ -265,7 +265,7 @@ def _base_vary_hp_mante(i, hp_ranges, base_name):
         hp[key] = hp_ranges[key][index]
 
     model_dir = os.path.join(DATAPATH, base_name, str(i))
-    train.train(model_dir, hp, ruleset='mante',
+    train.train(model_dir, hp, ruleset='_delaydm',
                 max_steps=1e7, seed=i // n_max)
 
     # Analyses
@@ -278,8 +278,8 @@ def _base_vary_hp_mante(i, hp_ranges, base_name):
     data_analysis.compute_var_all(model_dir)
 
 
-def vary_l2_init_mante(i):
-    """Vary the hyperparameters and train on Mante tasks only.
+def vary_l2_init__delaydm(i):
+    """Vary the hyperparameters and train on _delaydm tasks only.
 
     This experiment loops over a set of hyperparameters.
 
@@ -294,11 +294,11 @@ def vary_l2_init_mante(i):
     hp_ranges['l2_weight_init'] = [0, 1e-4, 2*1e-4, 4*1e-4, 8*1e-4, 1.6*1e-3]
     hp_ranges['target_perf'] = [0.9]
 
-    _base_vary_hp_mante(i, hp_ranges, base_name='vary_l2init_mante')
+    _base_vary_hp_delaydm(i, hp_ranges, base_name='vary_l2init_delaydm')
 
 
-def vary_l2_weight_mante(i):
-    """Vary the hyperparameters and train on Mante tasks only.
+def vary_l2_weight_delaydm(i):
+    """Vary the hyperparameters and train on _delaydm tasks only.
 
     This experiment loops over a set of hyperparameters.
 
@@ -313,11 +313,11 @@ def vary_l2_weight_mante(i):
     hp_ranges['l2_weight'] = [0, 1e-4, 2*1e-4, 4*1e-4, 8*1e-4, 1.6*1e-3]
     hp_ranges['target_perf'] = [0.9]
 
-    _base_vary_hp_mante(i, hp_ranges, base_name='vary_l2weight_mante')
+    _base_vary_hp_delaydm(i, hp_ranges, base_name='vary_l2weight_delaydm')
 
 
-def vary_p_weight_train_mante(i):
-    """Vary the hyperparameters and train on Mante tasks only.
+def vary_p_weight_train_delaydm(i):
+    """Vary the hyperparameters and train on _delaydm tasks only.
 
     This experiment loops over a set of hyperparameters.
 
@@ -333,7 +333,7 @@ def vary_p_weight_train_mante(i):
     hp_ranges['p_weight_train'] = [0.05, 0.075]
     hp_ranges['target_perf'] = [0.9]
 
-    _base_vary_hp_mante(i, hp_ranges, base_name='vary_pweighttrain_mante')
+    _base_vary_hp_delaydm(i, hp_ranges, base_name='vary_pweighttrain_delaydm')
 
 
 def pretrain(setup, seed):

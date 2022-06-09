@@ -186,7 +186,7 @@ def train(model_dir,
           hp=None,
           max_steps=1e7,
           display_step=500,
-          ruleset='mante',
+          ruleset='_delaydm',
           rule_trains=None,
           rule_prob_map=None,
           seed=0,
@@ -351,7 +351,7 @@ def train_sequential(
         hp=None,
         max_steps=1e7,
         display_step=500,
-        ruleset='mante',
+        ruleset='_delaydm',
         seed=0,
         ):
     '''Train the network sequentially.
@@ -647,5 +647,5 @@ if __name__ == '__main__':
     os.environ["CUDA_VISIBLE_DEVICES"] = "0"
     hp = {'activation': 'softplus', 'n_rnn': 64, 'mix_rule': True, 'l1_h': 1e-8}
     # added 'use_separate_input' parameter to def train
-    train(args.modeldir, seed=1, hp=hp, ruleset='mante',
+    train(args.modeldir, seed=1, hp=hp, ruleset='_delaydm',
           display_step=500, use_separate_input=True)

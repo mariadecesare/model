@@ -190,8 +190,8 @@ def get_dimension_16_dim(data_train, data_test, n_unit_used=None, n_rep=1):
 
 def _get_dimension_varyusedunit(analyze_data=False, n_unit_used_list=None, **kwargs):
     if analyze_data:
-        from mante_data_analysis import load_mante_data
-        data = load_mante_data()
+        from _delaydm_data_analysis import load_delaydm_data
+        data = load_delaydm_data()
         data_train, data_test = get_trial_avg(data=data)
     else:
         from choiceattend_analysis import StateSpaceAnalysis
@@ -303,7 +303,7 @@ def call_get_dimension_varyusedunit_16_dim(save_name = 'debug', n_rep=10):#10. #
     #fname = os.path.join('data', 'config_' + save_name + '.pkl') 
 
     #if save_name == 'Data':
-    #    fname = os.path.join('data', 'ManteData.pkl') #'ManteDataCond.pkl'
+    #    fname = os.path.join('data', '_delaydmData.pkl') #'_delaydmDataCond.pkl'
     
     #if os.path.isfile(fname):
     #    with open(fname, 'rb') as f:

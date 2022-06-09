@@ -15,7 +15,7 @@ from analysis import variance
 from analysis import contextdm_analysis
 import tools
 
-DATAPATH = './datasets/mante_dataset'
+DATAPATH = './datasets/_delaydm_dataset'
 # sns.xkcd_palette(['orange', 'green', 'pink', 'sky blue'])
 COLORS = [(0.9764705882352941, 0.45098039215686275, 0.023529411764705882),
  (0.08235294117647059, 0.6901960784313725, 0.10196078431372549),
@@ -23,24 +23,24 @@ COLORS = [(0.9764705882352941, 0.45098039215686275, 0.023529411764705882),
  (0.4588235294117647, 0.7333333333333333, 0.9921568627450981)]
 
 
-def load_data(dataset='mante', smooth=True, model_dir=None):
+def load_data(dataset='_delaydm', smooth=True, model_dir=None):
     """Analyzing a dataset.
 
     Args:
-        dataset: str, 'mante', 'mante_single', 'siegel', or 'model'
+        dataset: str, '_delaydm', '_delaydm_single', 'siegel', or 'model'
         smooth: bool, whether to use smoothed data
         analyze_single_units: bool, whether to analyze single units
     """
-    from datasets import mante_dataset_preprocess
+    from datasets import _delaydm_dataset_preprocess
     from datasets import siegel_dataset_preprocess
 
     if smooth:
         print('Loading smooth data')
     else:
         print('Loading original data')
-    if 'mante' in dataset:
+    if '_delaydm' in dataset:
         single_units = 'single' in dataset
-        return mante_dataset_preprocess.load_data(
+        return _delaydm_dataset_preprocess.load_data(
             smooth=smooth, single_units=single_units, animal=dataset[-2:])
     elif dataset == 'siegel':
         return siegel_dataset_preprocess.load_data(single_file=False)
@@ -441,7 +441,7 @@ def _compute_var_all(data, var_method='time_avg_early'):
 def compute_var_all(model_dir, restore=True):
     """Compute task variance."""
     
-    fname = 'mante_taskvar.pkl'
+    fname = '_delaydm_taskvar.pkl'
     fname = os.path.join(model_dir, fname)
 
     if restore and os.path.isfile(fname):
@@ -764,7 +764,7 @@ def study_betaweights(analyze_single_units=True, ind_group=None):
 #                 ax.set_title('context '+context_names[i_ax])
 #
 #     if save:
-#         save_name = 'mante_unit{:d}'.format(i_unit)
+#         save_name = '_delaydm_unit{:d}'.format(i_unit)
 #         plt.savefig(os.path.join('figure',save_name+'.pdf'), transparent=True)
 
 
@@ -807,21 +807,21 @@ def plot_fracvar_hist_byhp(hp_vary, save_name=None, mode='all_var'):
                  'w_rec_init': 'randortho',
                  }
     if hp_vary == 'l2_weight_init':
-        root_dir = './data/vary_l2init_mante'
+        root_dir = './data/vary_l2init_delaydm'
         title = r'$L_2$ initial weight'
         hp_vary_vals = [0, 8*1e-4]
         ylim = [0, 0.3]
         n = len(hp_vary_vals)
         colors = [mpl.cm.cool(i * 1.0 / n) for i in range(n)]
     elif hp_vary == 'l2_weight':
-        root_dir = './data/vary_l2weight_mante'
+        root_dir = './data/vary_l2weight_delaydm'
         title = r'$L_2$ weight'
         hp_vary_vals = [0, 8 * 1e-4]
         ylim = [0, 0.3]
         n = len(hp_vary_vals)
         colors = [mpl.cm.cool(i * 1.0 / n) for i in range(n)]
     elif hp_vary == 'p_weight_train':
-        root_dir = './data/vary_pweighttrain_mante'
+        root_dir = './data/vary_pweighttrain_delaydm'
         title = r'$P_{\mathrm{train}}$'
         hp_vary_vals = [1, 0.1]
         ylim = [0, 0.15]
@@ -852,7 +852,7 @@ def plot_fracvar_hist_byhp(hp_vary, save_name=None, mode='all_var'):
         if mode == 'all_var':
             hist_tmp, bins_edge = variance.compute_hist_varprop(model_dirs,
                                                                 rule_pair)
-        elif mode == 'mante_var':
+        elif mode == '_delaydm_var':
             hist = list()
             for d in model_dirs:
                 var_dict = compute_var_all(d)
@@ -922,24 +922,24 @@ def plot_all(dataset):
     """Plot all statistics for datasets.
     
     Args:
-        dataset: str. Can be mante_ar, mante_single_ar, mante_fe,
-        mante_single_fe, siegel, model
+        dataset: str. Can be _delaydm_ar, _delaydm_single_ar, _delaydm_fe,
+        _delaydm_single_fe, siegel, model
     """
     # [0, 3.*1e-6, 1e-5, 3*1e-4, 1e-4, 3*1e-3]
     if dataset == 'model':
 # =============================================================================
-#         root_dir = './data/vary_l2init_mante'
+#         root_dir = './data/vary_l2init_delaydm'
 #         hp_target = {'activation': 'softplus',
 #                      'rnn_type': 'LeakyRNN',
 #                      'w_rec_init': 'randortho',
 #                      'l2_weight_init': 0*1e-4}
 # =============================================================================
-        root_dir = './data/vary_pweighttrain_mante'
+        root_dir = './data/vary_pweighttrain_delaydm'
         hp_target = {'activation': 'softplus',
                      'rnn_type': 'LeakyRNN',
                      'p_weight_train': 0.1}
 # =============================================================================
-#         root_dir = './data/mante_tanh'
+#         root_dir = './data/_delaydm_tanh'
 #         hp_target = {}
 # =============================================================================
         # model_dir = tools.find_model(root_dir, hp_target, perf_min=0.8)
@@ -947,7 +947,7 @@ def plot_all(dataset):
         model_dirs = tools.select_by_perf(model_dirs, perf_min=0.8)
         print(len(model_dirs))
         model_dir = model_dirs[1]
-        # model_dir = 'data/mante_l2init'
+        # model_dir = 'data/_delaydm_l2init'
     else:
         model_dir = None
 
@@ -978,7 +978,7 @@ def plot_all(dataset):
 
 if __name__ == '__main__':
     pass
-    plot_all('mante_single_fe')
+    plot_all('_delaydm_single_fe')
 
     # hists = plot_fracvar_hist_byhp(hp_vary='l2_weight', mode='all_var')
     # hists = plot_fracvar_hist_byhp(hp_vary='c_intsyn', mode='all_var')

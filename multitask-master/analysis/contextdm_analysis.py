@@ -556,7 +556,7 @@ def load_data(model_dir=None, sigma_rec=0, lesion_units=None, n_rep=1):
             response array has shape (n_trial, n_time)
     """
     if model_dir is None:
-        model_dir = './mantetemp'  # TEMPORARY SETTING
+        model_dir = './_delaydmtemp'  # TEMPORARY SETTING
 
     # Get rules and regressors
     rules = ['contextdm1', 'contextdm2']
@@ -641,7 +641,7 @@ def load_data(model_dir=None, sigma_rec=0, lesion_units=None, n_rep=1):
 
 
 if __name__ == '__main__':
-    root_dir = './data/vary_pweighttrain_mante'
+    root_dir = './data/vary_pweighttrain_delaydm'
     hp_target = {'activation': 'softplus',
                  'rnn_type': 'LeakyRNN',
                  'w_rec_init': 'randortho',

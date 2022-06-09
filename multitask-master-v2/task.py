@@ -12,7 +12,7 @@ rules_dict = \
               'delaydm1', 'delaydm2', 'contextdelaydm1', 'contextdelaydm2', 'multidelaydm',
               'dmsgo', 'dmsnogo', 'dmcgo', 'dmcnogo'],
 
-    'mante' : ['contextdm1', 'contextdm2'],
+    '_delaydm' : ['contextdm1', 'contextdm2'],
 
     'oicdmc' : ['oic', 'dmc']}
 
