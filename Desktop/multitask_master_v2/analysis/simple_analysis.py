@@ -1,0 +1,1 @@
+import standard_analysismodel_dir = 'debug'rule = '_delaydm'standard_analysis.easy_activity_plot(model_dir, rule)
