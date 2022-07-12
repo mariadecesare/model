@@ -1,1 +1,0 @@
-# Added so I can refer to files upstreamimport syssys.path.insert(1, '/Users/mariadecesare/Desktop/multitask_master_v2')import standard_analysismodel_dir = 'debug'rule = '_delaydm'standard_analysis.easy_activity_plot(model_dir, rule)
