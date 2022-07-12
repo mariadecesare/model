@@ -1,0 +1,1 @@
+{"model_dir": "debug", "trials": [0], "times": [0.31360292434692383], "cost_contextdm1": [1.2751651145517826], "creg_contextdm1": [0.0], "perf_contextdm1": [0.0078125], "cost_contextdm2": [1.530044812709093], "creg_contextdm2": [0.0], "perf_contextdm2": [0.001953125], "perf_avg": [0.0048828125], "perf_min": [0.001953125]}
