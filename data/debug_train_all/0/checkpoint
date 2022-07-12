@@ -1,0 +1,2 @@
+model_checkpoint_path: "/Users/mariadecesare/Documents/Research/model/working_analysis/multitask_master_v2.2/data/debug_train_all/0/model.ckpt"
+all_model_checkpoint_paths: "/Users/mariadecesare/Documents/Research/model/working_analysis/multitask_master_v2.2/data/debug_train_all/0/model.ckpt"

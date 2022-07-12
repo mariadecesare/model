@@ -1,0 +1,1 @@
+{"model_dir": "debug", "trials": [0], "times": [0.23804783821105957], "cost_delaydm1": [0.9265530668199062], "creg_delaydm1": [0.0], "perf_delaydm1": [0.0234375], "cost_delaydm2": [0.8189224228262901], "creg_delaydm2": [0.0], "perf_delaydm2": [0.0], "perf_avg": [0.01171875], "perf_min": [0.0]}
