@@ -24,6 +24,8 @@ Train a default network with:
 
     import train
     train.train(model_dir='debug', hp={'learning_rate': 0.001}, ruleset='_delaydm')
+    
+    "n_eachring": 32, "num_ring": 2
 
 These lines will train a default network for the Mante task, and store the
 results in your_working_directory/debug/.

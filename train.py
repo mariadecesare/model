@@ -29,6 +29,7 @@ def get_default_hp(ruleset):
     n_rule = task.get_num_rule(ruleset)
 
     n_eachring = 32
+    #n_eachring = 4
     n_input, n_output = 1+num_ring*n_eachring+n_rule, n_eachring+1
     hp = {
             # batch size for training

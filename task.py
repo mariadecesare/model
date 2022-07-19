@@ -27,6 +27,9 @@ for ruleset, rules in rules_dict.items():
 def get_num_ring(ruleset):
     '''get number of stimulus rings'''
     return 3 if ruleset=='oicdmc' else 2
+    #return 1
+    # they are hard coding in 3
+    # want to change it to be 1
 
 
 def get_num_rule(ruleset):
@@ -60,32 +63,44 @@ class Trial(object):
         self.dt = self.config['dt']
 
         self.n_eachring = self.config['n_eachring']
+        # n_eachring = number of stimuli in each stimuli ring
+            # here it's 32 - we probs want 4
         self.n_input = self.config['n_input']
         self.n_output = self.config['n_output']
-        self.pref  = np.arange(0,2*np.pi,2*np.pi/self.n_eachring) # preferences
+        self.pref  = np.arange(0,2*np.pi,2*np.pi/self.n_eachring) 
+        # preferences, just a ring
 
         self.batch_size = batch_size
         self.tdim = tdim
         self.x = np.zeros((tdim, batch_size, self.n_input), dtype=self.float_type)
         self.y = np.zeros((tdim, batch_size, self.n_output), dtype=self.float_type)
+        # can see that it's three dimensions: tdim, batchsize,..
         if self.config['loss_type'] == 'lsq':
             self.y[:,:,:] = 0.05
         # y_loc is the stimulus location of the output, -1 for fixation, (0,2 pi) for response
+        # y_loc = where eyes are supposed to go
+        # rectangular array trials*batch size originally set to -1
         self.y_loc = -np.ones((tdim, batch_size)      , dtype=self.float_type)
 
         self._sigma_x = config['sigma_x']*np.sqrt(2/config['alpha'])
+        # alpha = discretization time step constant
 
     def expand(self, var):
         """Expand an int/float to list."""
         if not hasattr(var, '__iter__'):
+            # hasattr = returns true if specified obj has specified attri otherwise false
             var = [var] * self.batch_size
+            # if it's not itterable, then it equals itself times the batch size
         return var
+    # so just takes number and expands it to list of that many of that number
 
+    # generic stimulus:
     def add(self, loc_type, locs=None, ons=None, offs=None, strengths=1, mods=None):
         """Add an input or stimulus output.
 
         Args:
             loc_type: str (fix_in, stim, fix_out, out), type of information to be added
+                not adding one trial at a time but some info to many trials at a time?
             locs: array of list of float (batch_size,), locations to be added, only for loc_type=stim or out
             ons: int or list, index of onset time
             offs: int or list, index of offset time
@@ -95,16 +110,24 @@ class Trial(object):
 
         ons = self.expand(ons)
         offs = self.expand(offs)
+        # make strengths = 1
         strengths = self.expand(strengths)
         mods = self.expand(mods)
+        #mods = modality (sight/sound/etc)
 
         for i in range(self.batch_size):
             if loc_type == 'fix_in':
                 self.x[ons[i]: offs[i], i, 0] = 1
+                # x = grid that says what's going on at a trial time (what stimulus/are they fixating or not/etc)
+                # dim 1 of x (ons[i]: offs[i]) = time
+                # dim 2 of x (i) = trial
+                # dim 3 of x (0) = fixation?
             elif loc_type == 'stim':
                 # Assuming that mods[i] starts from 1
                 self.x[ons[i]: offs[i], i, 1+(mods[i]-1)*self.n_eachring:1+mods[i]*self.n_eachring] \
                     += self.add_x_loc(locs[i])*strengths[i]
+                    # make strengths all = 1
+                    # add_x_loc = input activity given location
             elif loc_type == 'fix_out':
                 # Notice this shouldn't be set at 1, because the output is logistic and saturates at 1
                 if self.config['loss_type'] == 'lsq':
@@ -121,6 +144,8 @@ class Trial(object):
                 self.y_loc[ons[i]: offs[i], i] = locs[i]
             else:
                 raise ValueError('Unknown loc_type')
+                
+    # so x is not eye movement 
 
     def add_x_noise(self):
         """Add input noise."""
@@ -174,12 +199,17 @@ class Trial(object):
             ind_rule = get_rule_index(rule, self.config)
             self.x[on:off, :, ind_rule] = strength
 
+    # wanna change so it's spikes, not a circle of stimulus
+    # change it to create a 1 and all zeros
     def add_x_loc(self, x_loc):
         """Input activity given location."""
         dist = get_dist(x_loc-self.pref)  # periodic boundary
+        # pref = number of rings
         dist /= np.pi/8
         return 0.8*np.exp(-dist**2/2)
+        # want to change anything that misses mark to be zero
 
+    # leave this
     def add_y_loc(self, y_loc):
         """Target response given location."""
         dist = get_dist(y_loc-self.pref)  # periodic boundary
@@ -188,6 +218,7 @@ class Trial(object):
             y = 0.8*np.exp(-dist**2/2)
         else:
             # One-hot output
+            # want to add this to x
             y = np.zeros_like(dist)
             ind = np.argmin(dist)
             y[ind] = 1.
@@ -208,6 +239,158 @@ def test_init(config, mode, **kwargs):
     trial.add('fix_in', offs=fix_offs)
 
     return trial
+
+
+# task we are going to try out:
+def _delaydm(config, mode, stim_mod, **kwargs):
+    '''
+    Fixate whenever fixation point is shown.
+    Two stimuluss are shown at different time, with different intensities
+
+    The fixation is shown between (0, fix_off)
+        fix_off occurs at end of trial
+    The two stimuluss is shown between (0,T)
+
+    The output should be fixation location for (0, fix_off)
+    Otherwise the location of the stronger stimulus
+
+    :param mode: the mode of generating. Options: 'random', 'explicit'...
+    Optional parameters:
+    :param batch_size: Batch size (required for mode=='random')
+    :param tdim: dimension of time (required for mode=='sample')
+    :param param: a dictionary of parameters (required for mode=='explicit')
+    :return: 2 Tensor3 data array (Time, Batchsize, Units)
+    '''
+    dt = config['dt']
+    # dt = time step (leave)
+    rng = config['rng']
+    if mode == 'random': # Randomly generate parameters
+        batch_size = kwargs['batch_size']
+
+        # A list of locations of stimuluss (they are always on)
+        stim_dist = rng.uniform(0.5*np.pi, 1.5*np.pi,(batch_size,))*rng.choice([-1,1],(batch_size,))
+        stim1_locs = rng.uniform(0, 2*np.pi, (batch_size,))
+        stim2_locs = (stim1_locs+stim_dist)%(2*np.pi)
+
+        stims_mean = rng.uniform(0.8,1.2,(batch_size,))
+        # stims_diff = rng.choice([0.32,0.64,1.28],(batch_size,))
+
+        stim_coh_range = np.array([0.08,0.16,0.32])
+        if ('easy_task' in config) and config['easy_task']:
+            # stim_coh_range = np.array([0.16,0.32,0.64])
+            stim_coh_range *= 2
+
+        stims_coh  = rng.choice(stim_coh_range,(batch_size,))
+        stims_sign = rng.choice([1,-1], (batch_size,))
+
+        # make strengths = 1
+        stim1_strengths = stims_mean + stims_coh*stims_sign
+        stim2_strengths = stims_mean - stims_coh*stims_sign
+
+        # stim1_strengths = rng.uniform(0.25,1.75,(batch_size,))
+        # stim2_strengths = rng.uniform(0.25,1.75,(batch_size,))
+
+        # Time of stimuluss on/off
+        stim1_ons  = int(rng.choice([200, 400, 600])/dt)
+        stim1_offs = stim1_ons + int(rng.choice([200, 400, 600])/dt)
+        stim2_ons  = stim1_offs + int(rng.choice([200, 400, 800, 1600])/dt)
+        stim2_offs = stim2_ons + int(rng.choice([200, 400, 600])/dt)
+        fix_offs  = stim2_offs + int(rng.uniform(100,300)/dt)
+
+        # stim2_ons  = (np.ones(batch_size)*rng.choice([400,500,600,700,1400])/dt).astype(int)
+        # stim2_ons  = (np.ones(batch_size)*rng.choice([400,600,1000,1400,2000])/dt).astype(int)
+        # stim2_ons  = (np.ones(batch_size)*rng.uniform(2800,3200)/dt).astype(int)
+
+        # each batch consists of sequences of equal length
+        tdim = fix_offs + int(500/dt) # longest trial
+
+
+    # where stuff is fixed
+    elif mode == 'test':
+        # tdim = how long the trial is? 3 seconds? 
+        tdim = int(3000/dt)
+        n_stim_loc, n_stim1_strength = batch_shape = 20, 5 #fine, we don't care
+        # batch_shape = array containing 20 and 5 
+        batch_size = np.prod(batch_shape)
+        #np.prod = product of array elements = 20*5 = 100?
+        ind_stim_loc, ind_stim1_strength = np.unravel_index(range(batch_size),batch_shape)
+
+        fix_offs  = int(2700/dt)
+        # so whole trial is 3000
+        stim1_locs = 2*np.pi*ind_stim_loc/n_stim_loc
+        stim2_locs = (stim1_locs+np.pi)%(2*np.pi)
+        # gives a rectangle of locations
+        # makes strengths = 1
+        stim1_strengths = 1.0*ind_stim1_strength/n_stim1_strength+0.5
+        stim2_strengths = 2 - stim1_strengths
+        # get rid of strengths
+        stim1_ons = int(500/dt)
+        stim1_offs = int(1000/dt)
+        # comes on at 500  ms ends at 1000 ms
+        stim2_ons = int(2000/dt)
+        stim2_offs = int(2500/dt)
+
+    elif mode == 'psychometric':
+        p = kwargs['params']
+        stim1_locs       = p['stim1_locs']
+        stim2_locs       = p['stim2_locs']
+        stim1_strengths  = p['stim1_strengths']
+        stim2_strengths  = p['stim2_strengths']
+        stim1_ons        = int(p['stim1_ons']/dt)
+        stim1_offs       = int(p['stim1_offs']/dt)
+        stim2_ons        = int(p['stim2_ons']/dt)
+        stim2_offs       = int(p['stim2_offs']/dt)
+        batch_size = len(stim1_locs)
+
+        fix_offs = int(200/dt) + stim2_offs
+        tdim = int(300/dt) + fix_offs
+
+    else:
+        raise ValueError('Unknown mode: ' + str(mode))
+
+    # time to check the saccade location
+    # saccade = eye movement
+    # want our saccade to be one direction or the other
+    # leave
+    check_ons  = fix_offs + int(100/dt)
+
+    # Trial() = class
+    trial = Trial(config, tdim, batch_size)
+    trial.add('fix_in', offs=fix_offs)
+    trial.add('stim', stim1_locs, ons=stim1_ons, offs=stim1_offs, strengths=stim1_strengths, mods=stim_mod)
+    trial.add('stim', stim2_locs, ons=stim2_ons, offs=stim2_offs, strengths=stim2_strengths, mods=stim_mod)
+    trial.add('fix_out', offs=fix_offs)
+    # where output should be (go left or right depending):
+    stim_locs = [stim1_locs[i] if (stim1_strengths[i]>stim2_strengths[i])
+                else stim2_locs[i] for i in range(batch_size)]
+    trial.add('out', stim_locs, ons=fix_offs)
+
+    # leave this
+    trial.add_c_mask(pre_offs=fix_offs, post_ons=check_ons)
+
+    trial.epochs = {'fix1'     : (None, stim1_ons),
+                   'stim1'     : (stim1_ons, stim1_offs),
+                   'delay1'   : (stim1_offs, stim2_ons),
+                   'stim2'     : (stim2_ons, stim2_offs),
+                   'delay2'   : (stim2_offs, fix_offs),
+                   'go1'      : (fix_offs, None)}
+
+    return trial
+
+
+def delaydm1(config, mode, **kwargs):
+    return _delaydm(config, mode, 1, **kwargs)
+
+
+def delaydm2(config, mode, **kwargs):
+    return _delaydm(config, mode, 2, **kwargs)
+
+
+
+
+
+
+
 
 
 def delaygo_(config, mode, anti_response, **kwargs):
@@ -721,6 +904,7 @@ def _dm(config, mode, stim_mod, **kwargs):
         fix_offs  = int(2000/dt)
 
         stim1_locs = 2*np.pi*ind_stim_loc/n_stim_loc
+        # gives a rectangle of locations
         stim2_locs = (stim1_locs+np.pi)%(2*np.pi)
         stim1_strengths = 0.4*ind_stim1_strength/n_stim1_strength+0.8
         stim2_strengths = 2 - stim1_strengths
@@ -772,6 +956,7 @@ def dm2(config, mode, **kwargs):
     return _dm(config, mode, 2, **kwargs)
 
 
+"""
 # task we are going to try out:
 def _delaydm(config, mode, stim_mod, **kwargs):
     '''
@@ -897,6 +1082,7 @@ def delaydm1(config, mode, **kwargs):
 
 def delaydm2(config, mode, **kwargs):
     return _delaydm(config, mode, 2, **kwargs)
+"""
 
 
 def _contextdelaydm(config, mode, attend_mod, **kwargs):
@@ -1247,11 +1433,13 @@ def dmc_(config, mode, matchnogo, **kwargs):
         stim2_mod = ind_mod2 + 1
 
         n_stim_loc2 = n_stim_loc/2
+        # 10 locations for stimulus 2
         stim1_locs_ = np.concatenate(((0.1+0.8*np.arange(n_stim_loc2)/n_stim_loc2),
                                     (1.1+0.8*np.arange(n_stim_loc2)/n_stim_loc2)))*np.pi
         stim1_locs = np.array([stim1_locs_[i] for i in ind_stim_loc])
         matchs = (1 - matchnogo)*np.ones(batch_size) # make sure the response is Go
         stim2_locs = (stim1_locs+np.pi*(1-matchs))%(2*np.pi)
+        # these are just the different locations for stimuli for mante task - we don't really care
 
         stim1_ons  = int(500/dt)
         stim1_offs = stim1_ons + int(500/dt)
